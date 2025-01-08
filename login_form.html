@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Specifies the document's character encoding and ensures responsiveness -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Sets the page title -->
+    <title>Login</title>
+    
+    <!-- Inline CSS styles -->
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif; /* Font family */
+            background-color: #000; /* Black background */
+            color: #1b1b1b; /* Dark text color */
+            margin: 0;
+            padding: 0;
+            display: flex; /* Flexbox for centering */
+            justify-content: center; /* Centers content horizontally */
+            align-items: center; /* Centers content vertically */
+            height: 100vh; /* Full viewport height */
+        }
+
+        /* Styling for the login container */
+        .login-container {
+            background-color: transparent; /* Transparent background */
+            padding: 20px 30px; /* Padding for spacing */
+            border-radius: 12px; /* Rounded corners */
+            background-color: #000000; /* Solid black background */
+            background-image: linear-gradient(180deg, #000000 0%, #d4cece 100%); /* Gradient background */
+            border: none; /* No border */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Shadow effect */
+            width: 100%; /* Full width */
+            max-width: 400px; /* Limits the maximum width */
+        }
+
+        /* Header styling */
+        h2 {
+            margin-bottom: 20px; /* Space below the header */
+            text-align: center; /* Centers the text */
+            font-size: 24px; /* Font size */
+            color: #4CAF50; /* Green text color */
+        }
+
+        /* Form styling */
+        form {
+            display: flex; /* Flexbox for layout */
+            flex-direction: column; /* Stacks elements vertically */
+        }
+
+        /* Input field styling */
+        input {
+            margin-bottom: 15px; /* Space below each input */
+            background-color: transparent; /* Transparent background */
+            padding: 12px; /* Padding inside input fields */
+            font-size: 16px; /* Font size */
+            color: rgb(0, 0, 0); /* Black text color */
+            border: 1px solid #464040; /* Border color */
+            border-radius: 8px; /* Rounded corners */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition on focus */
+        }
+
+        /* Styling for input focus */
+        input:focus {
+            border-color: #99ec9b; /* Green border on focus */
+            box-shadow: 0 0 5px rgba(27, 27, 27, 0.5); /* Shadow effect on focus */
+            outline: none; /* Removes default outline */
+        }
+
+        /* Placeholder text styling */
+        input::placeholder {
+            color: #161212; /* Default placeholder text color */
+            font-size: 16px; /* Font size of the placeholder */
+            opacity: 1; /* Ensures full visibility */
+        }
+
+        /* Placeholder color change on input focus */
+        input:focus::placeholder {
+            color: #84c986; /* Greenish placeholder color */
+            opacity: 1;
+        }
+
+        /* Button styling */
+        button {
+            padding: 12px; /* Padding inside button */
+            font-size: 16px; /* Font size */
+            background-color: #4CAF50; /* Green background */
+            color: rgb(24, 0, 0); /* Text color */
+            border: none; /* Removes border */
+            border-radius: 8px; /* Rounded corners */
+            cursor: pointer; /* Changes cursor to pointer */
+            transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+        }
+
+        /* Button hover effect */
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+            transform: translateY(-2px); /* Slight upward movement */
+        }
+
+        /* Message section styling */
+        .message {
+            text-align: center; /* Centers text */
+            margin-top: 15px; /* Space above the message */
+            color: red; /* Error message color */
+        }
+
+        /* Responsive design for small screens */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px; /* Reduced padding for smaller screens */
+            }
+
+            h2 {
+                font-size: 20px; /* Smaller header size */
+            }
+
+            input, button {
+                font-size: 14px; /* Reduced font size for inputs and buttons */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login container -->
+    <div class="login-container">
+        <h2>Sign in</h2>
+        
+        <!-- Login form -->
+        <form id="loginForm" method="POST" action="login.php">
+            <!-- Email input field -->
+            <input type="email" name="email" placeholder="Email" required>
+            
+            <!-- Password input field -->
+            <input type="password" name="password" placeholder="Password" required>
+            
+            <!-- Submit button -->
+            <button type="submit">Login</button>
+        </form>
+        
+        <!-- Section to display messages -->
+        <div class="message" id="loginMessage"></div>
+    </div>
+
+    <!-- JavaScript for handling form submission -->
+    <script>
+        // Handles form submission using JavaScript
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault(); // Prevents the default form submission behavior
+
+            // Collect form data
+            const formData = new FormData(e.target);
+
+            try {
+                // Sends data to the server using fetch
+                const response = await fetch('login.php', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                // Gets the server response
+                const result = await response.text();
+                
+                // Displays the server message
+                document.getElementById('loginMessage').textContent = result;
+
+                // Redirects to the dashboard if login is successful
+                if (result.includes('Login successful')) {
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html'; // Redirect URL
+                    }, 2000); // Waits 2 seconds before redirecting
+                }
+            } catch (error) {
+                // Displays an error message in case of a network or server issue
+                document.getElementById('loginMessage').textContent = 'Error: Unable to login.';
+            }
+        };
+    </script>
+</body>
+</html>
+
