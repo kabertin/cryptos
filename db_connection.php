@@ -2,7 +2,7 @@
 // Database connection settings
 $host = 'localhost'; // Hostname of the database server
 $user = 'root'; // Database username
-$password = 'Olivakarinda1.'; // Database password
+$password = ''; // Database password
 $dbname = 'cryptos'; // Name of the database to connect to
 
 // Create a new MySQLi connection object
