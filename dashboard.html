@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Root of the HTML document. Specifies the document type as HTML5 and sets the language to English. -->
+
+<head>
+    <!-- Metadata and styles for the cryptocurrency search page -->
+    <meta charset="UTF-8">
+    <!-- Sets the character encoding for proper rendering of text -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ensures responsiveness by making the page scale properly on all devices -->
+    <title>Cryptocurrency Search</title>
+    <!-- Page title displayed on the browser tab -->
+    <style>
+        /* CSS for the page layout, appearance, and components */
+        body {
+            /* Sets a black background and white text for a cryptocurrency-themed design */
+        }
+
+        h1 {
+            /* Green header for aesthetic appeal */
+        }
+
+        #navBar {
+            /* Navigation bar with links to other pages */
+        }
+
+        #searchBar {
+            /* Input field for searching cryptocurrencies */
+        }
+
+        #cryptoList {
+            /* Grid layout for displaying cryptocurrency cards */
+        }
+
+        .crypto-card {
+            /* Style for each cryptocurrency card, including shadow and padding */
+        }
+
+        .modal {
+            /* Style for modal pop-up for viewing cryptocurrency details */
+        }
+
+        .close-btn {
+            /* Close button styling for the modal */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main content starts here -->
+
+    <h1>Cryptocurrencies</h1>
+    <!-- Title of the page -->
+
+    <div id="navBar">
+        <!-- Navigation bar -->
+        <a href="dashboard.html">All Coins</a>
+        <!-- Links to other sections -->
+        <a href="favorites.html">Favorites</a>
+        <a href="charts.html">Charts</a>
+        <a href="set_notification.php">Notifications</a>
+    </div>
+
+    <input type="text" id="searchBar" placeholder="Search for cryptocurrencies..." oninput="filterCryptos()" />
+    <!-- Search bar to filter cryptocurrencies -->
+
+    <div id="cryptoList"></div>
+    <!-- Container to display the list of cryptocurrencies -->
+
+    <div id="cryptoModal" class="modal">
+        <!-- Modal for displaying detailed information about a cryptocurrency -->
+        <div class="modal-content">
+            <div id="cryptoDetails"></div>
+            <!-- Container for cryptocurrency details -->
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript functionality for dynamic cryptocurrency search and display
+        let allCryptos = [];
+
+        async function fetchCryptos() {
+            /* Fetches the list of cryptocurrencies and their initial prices from a server */
+        }
+
+        function displayCryptos(cryptos) {
+            /* Dynamically generates and displays cryptocurrency cards in the grid */
+        }
+
+        async function updatePrices() {
+            /* Periodically updates the prices of cryptocurrencies */
+        }
+
+        function startPriceUpdates() {
+            /* Starts a timer to update prices every 10 seconds */
+        }
+
+        function filterCryptos() {
+            /* Filters the displayed cryptocurrencies based on the user's search input */
+        }
+
+        async function addToFavorites(cryptoId, cryptoName) {
+            /* Adds a cryptocurrency to the user's favorites list */
+        }
+
+        async function viewDetails(cryptoId) {
+            /* Fetches and displays detailed information about a selected cryptocurrency in a modal */
+        }
+
+        function closeModal() {
+            /* Closes the modal displaying cryptocurrency details */
+        }
+
+        fetchCryptos();
+        /* Initial call to fetch cryptocurrencies when the page loads */
+    </script>
+</body>
+</html>
+
