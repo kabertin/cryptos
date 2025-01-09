@@ -1,119 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- Root of the HTML document. Specifies the document type as HTML5 and sets the language to English. -->
-
 <head>
-    <!-- Metadata and styles for the cryptocurrency search page -->
     <meta charset="UTF-8">
-    <!-- Sets the character encoding for proper rendering of text -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Ensures responsiveness by making the page scale properly on all devices -->
     <title>Cryptocurrency Search</title>
-    <!-- Page title displayed on the browser tab -->
     <style>
-        /* CSS for the page layout, appearance, and components */
+        /* General body styling */
         body {
-            /* Sets a black background and white text for a cryptocurrency-themed design */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000; /* Black background */
+            color: #fff; /* White text */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
+        /* Main title styling */
         h1 {
-            /* Green header for aesthetic appeal */
+            color: #4CAF50; /* Green color */
+            margin: 60px;
         }
 
+        /* Navigation bar styling */
         #navBar {
-            /* Navigation bar with links to other pages */
+            width: 100%;
+            background-color: #333; /* Dark background */
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            position: relative;
         }
 
+        /* Styling for navigation links */
+        #navBar a {
+            color: #fff;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 18px;
+            border-right: 1px solid #444;
+        }
+
+        /* Remove border from last nav link */
+        #navBar a:last-child {
+            border-right: none;
+        }
+
+        /* Hover effect for navigation links */
+        #navBar a:hover {
+            background-color: #ddd;
+            color: #000;
+        }
+
+        /* Search bar styling */
         #searchBar {
-            /* Input field for searching cryptocurrencies */
+            width: 100%;
+            max-width: 600px;
+            padding: 12px 20px;
+            margin-top: 40px;
+            font-size: 16px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #222;
+            color: #fff;
+            margin-bottom: 40px;
         }
 
+        /* Grid layout for cryptocurrency list */
         #cryptoList {
-            /* Grid layout for displaying cryptocurrency cards */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
         }
 
+        /* Styling for individual crypto cards */
         .crypto-card {
-            /* Style for each cryptocurrency card, including shadow and padding */
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
         }
 
+        /* Title styling within each crypto card */
+        .crypto-card h3 {
+            margin: 0 0 10px;
+            color: #fff;
+        }
+
+        /* Description styling within each crypto card */
+        .crypto-card p {
+            margin: 10px 0;
+            color: #ccc;
+        }
+
+        /* Button styling within each crypto card */
+        .crypto-card button {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #000000;
+            background-color: #b46c4a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Second button styling within each crypto card */
+        .crypto-card button:last-child {
+            background-color: #64ad62;
+        }
+
+        /* Modal styling */
         .modal {
-            /* Style for modal pop-up for viewing cryptocurrency details */
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
         }
 
+        /* Modal content styling */
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            color: #fff;
+        }
+
+        /* Close button styling within modal */
         .close-btn {
-            /* Close button styling for the modal */
+            background-color: #ff4444;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
-
 <body>
-    <!-- Main content starts here -->
-
+    <!-- Main Content Section -->
     <h1>Cryptocurrencies</h1>
-    <!-- Title of the page -->
 
+    <!-- Navigation Bar -->
     <div id="navBar">
-        <!-- Navigation bar -->
         <a href="dashboard.html">All Coins</a>
-        <!-- Links to other sections -->
         <a href="favorites.html">Favorites</a>
         <a href="charts.html">Charts</a>
         <a href="set_notification.php">Notifications</a>
     </div>
 
+    <!-- Search Bar for Filtering Cryptos -->
     <input type="text" id="searchBar" placeholder="Search for cryptocurrencies..." oninput="filterCryptos()" />
-    <!-- Search bar to filter cryptocurrencies -->
-
     <div id="cryptoList"></div>
-    <!-- Container to display the list of cryptocurrencies -->
 
+    <!-- Modal for displaying cryptocurrency details -->
     <div id="cryptoModal" class="modal">
-        <!-- Modal for displaying detailed information about a cryptocurrency -->
         <div class="modal-content">
             <div id="cryptoDetails"></div>
-            <!-- Container for cryptocurrency details -->
             <button class="close-btn" onclick="closeModal()">Close</button>
         </div>
     </div>
 
     <script>
-        // JavaScript functionality for dynamic cryptocurrency search and display
         let allCryptos = [];
 
+        // Function to fetch cryptocurrency data and display it on the page
         async function fetchCryptos() {
-            /* Fetches the list of cryptocurrencies and their initial prices from a server */
+            const response = await fetch('fetch_cryptos.php');
+            allCryptos = await response.json();
+            displayCryptos(allCryptos);
+            // Start updating cryptocurrency prices periodically
+            startPriceUpdates();
         }
 
+        // Function to display cryptocurrency cards dynamically
         function displayCryptos(cryptos) {
-            /* Dynamically generates and displays cryptocurrency cards in the grid */
+            const container = document.getElementById('cryptoList');
+            container.innerHTML = '';
+            cryptos.forEach(crypto => {
+                const div = document.createElement('div');
+                div.className = 'crypto-card';
+                div.id = `crypto-${crypto.id}`; // Unique ID for each card
+                div.innerHTML = `
+                    <h3>${crypto.name} (${crypto.symbol.toUpperCase()})</h3>
+                    <p>Price: $<span class="crypto-price">${crypto.current_price.toFixed(2)}</span></p>
+                    <button onclick="addToFavorites('${crypto.id}', '${crypto.name}')">Add to Favorites</button>
+                    <button onclick="viewDetails('${crypto.id}')">View Details</button>
+                `;
+                container.appendChild(div);
+            });
         }
 
+        // Function to update cryptocurrency prices periodically
         async function updatePrices() {
-            /* Periodically updates the prices of cryptocurrencies */
+            try {
+                const response = await fetch(`fetch_cryptos.php?ts=${Date.now()}`);
+                const updatedCryptos = await response.json();
+        
+                updatedCryptos.forEach(updatedCrypto => {
+                    const cryptoCard = document.getElementById(`crypto-${updatedCrypto.id}`);
+                    if (cryptoCard) {
+                        const priceElement = cryptoCard.querySelector('.crypto-price');
+                        priceElement.textContent = updatedCrypto.current_price.toFixed(2);
+                    }
+                });
+        
+                allCryptos = updatedCryptos;
+            } catch (error) {
+                console.error('Failed to update prices:', error);
+            }
         }
 
+        // Function to start periodic price updates every 10 seconds
         function startPriceUpdates() {
-            /* Starts a timer to update prices every 10 seconds */
+            setInterval(updatePrices, 10000); // Update every 10 seconds
         }
 
+        // Function to filter cryptocurrencies based on user input in the search bar
         function filterCryptos() {
-            /* Filters the displayed cryptocurrencies based on the user's search input */
+            const query = document.getElementById('searchBar').value.toLowerCase();
+            const filteredCryptos = allCryptos.filter(crypto =>
+                crypto.name.toLowerCase().includes(query) || crypto.symbol.toLowerCase().includes(query)
+            );
+            displayCryptos(filteredCryptos);
         }
 
+        // Function to add a cryptocurrency to favorites
         async function addToFavorites(cryptoId, cryptoName) {
-            /* Adds a cryptocurrency to the user's favorites list */
+            try {
+                const response = await fetch('add_favorite.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ crypto_id: cryptoId }),
+                });
+
+                const result = await response.text();
+
+                if (result.includes("Added to favorites")) {
+                    alert(`${cryptoName} added to favorites!`);
+                } else {
+                    alert(`${result}`);
+                }
+            } catch (error) {
+                console.error('Failed to add to favorites:', error);
+                alert('Failed to add to favorites. Please try again.');
+            }
         }
 
+        // Function to view detailed information about a cryptocurrency
         async function viewDetails(cryptoId) {
-            /* Fetches and displays detailed information about a selected cryptocurrency in a modal */
+            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}`);
+            const crypto = await response.json();
+
+            const container = document.getElementById('cryptoDetails');
+            container.innerHTML = `
+                <h1>${crypto.name} (${crypto.symbol.toUpperCase()})</h1>
+                <p>Current Price: $${crypto.market_data.current_price.usd}</p>
+                <p>Market Cap: $${crypto.market_data.market_cap.usd}</p>
+                <p>24h High: $${crypto.market_data.high_24h.usd}</p>
+                <p>24h Low: $${crypto.market_data.low_24h.usd}</p>
+            `;
+
+            const modal = document.getElementById('cryptoModal');
+            modal.style.display = 'flex'; // Show modal with details
         }
 
+        // Function to close the modal window
         function closeModal() {
-            /* Closes the modal displaying cryptocurrency details */
+            const modal = document.getElementById('cryptoModal');
+            modal.style.display = 'none'; // Hide modal
         }
 
+        // Fetch cryptocurrencies data on page load
         fetchCryptos();
-        /* Initial call to fetch cryptocurrencies when the page loads */
     </script>
 </body>
 </html>
