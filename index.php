@@ -204,7 +204,7 @@ $csrf_token = $_SESSION['csrf_token'];
     <!-- Button container for navigation -->
     <div class="button-container">
         <button onclick="window.location.href='login_form.html'">Sign In</button>
-        <button onclick="window.location.href='register.html'">Sign Up</button>
+        <button onclick="window.location.href='register.php'">Sign Up</button>
     </div>
 </body>
 </html>
