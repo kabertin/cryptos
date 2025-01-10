@@ -26,27 +26,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') { // Check if the form was submitted v
 
             // Generate a CSRF token if it doesn't already exist in the session
             if (empty($_SESSION['csrf_token'])) {
-                // Use a secure method to generate a random CSRF token (32 bytes converted to hex)
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             }
-            
-            // Output a success message upon successful login
-            echo "Login successful. Welcome, $email!";
+
+            // Output a success message and redirect to the welcome page
+            echo "<script>
+                    alert('Login successful. Welcome, $email!');
+                    window.location.href = 'dashboard.html';
+                </script>";
         } else {
-            // If the password is incorrect, show an error message
-            echo "Invalid password. Please try again.";
+            // If the password is incorrect, show an error message and redirect to the login page
+            echo "<script>
+                alert('Invalid password. Please try again.');
+                window.location.href = 'login_form.html';
+            </script>";
         }
     } else {
-        // If no user is found with the provided email, show an error message
-        echo "User not found. Please register first.";
+        // If no user is found with the provided email, show an error message and redirect to the registration page
+        echo "<script>
+            alert('User not found. Please register first.');
+            window.location.href = 'register.html';
+        </script>";
     }
 
     $stmt->close();  // Close the prepared statement after use
 } else {
-    // If the request method is not POST, show an error message
-    echo "Invalid request method.";
+    // If the request method is not POST, show an error message and redirect to the login page
+    echo "<script>
+        alert('Invalid request method.');
+        window.location.href = 'login_form.html';
+    </script>";
 }
 
 $conn->close();  // Close the database connection after use
 ?>
-

@@ -105,6 +105,7 @@
             text-align: center; /* Centers text */
             margin-top: 15px; /* Space above the message */
             color: red; /* Error message color */
+            display: none; /* Hides the message section */
         }
 
         /* Responsive design for small screens */
@@ -127,7 +128,8 @@
     <!-- Login container -->
     <div class="login-container">
         <h2>Sign in</h2>
-        
+        <!-- Section to display messages-->
+        <div class="message" id="loginMessage"></div>
         <!-- Login form -->
         <form id="loginForm" method="POST" action="login.php">
             <!-- Email input field -->
@@ -139,9 +141,6 @@
             <!-- Submit button -->
             <button type="submit">Login</button>
         </form>
-        
-        <!-- Section to display messages -->
-        <div class="message" id="loginMessage"></div>
     </div>
 
     <!-- JavaScript for handling form submission -->
@@ -180,4 +179,3 @@
     </script>
 </body>
 </html>
-
