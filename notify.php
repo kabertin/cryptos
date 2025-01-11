@@ -27,18 +27,18 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log, $
         $mail->Host       = 'cryptos.mercato.rw';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'alerts@cryptos.mercato.rw';
-        $mail->Password   = '';
+        $mail->Password   = 'Olivakarinda1.';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = 465;
 
         // Recipients
-        $mail->setFrom('alerts@cryptos.mercato.rw', 'Crypto Alert');
+        $mail->setFrom('alerts@cryptos.mercato.rw', 'Cryptos Price Alert');
         $mail->addAddress($to);
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Cryptocurrency Price Alert';
-        $mail->Body    = "Hello, the price of $crypto has reached your set alert price of $priceLevel USD. Current price: $currentPrice USD.";
+        $mail->Body    = "Hello, the price of \" $crypto \" has reached your set alert price of $priceLevel USD. Current price: $currentPrice USD.";
 
         // Send the email
         $mail->send();

@@ -20,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Sanitize and validate the input data
     $crypto = filter_var($_POST['crypto'], FILTER_SANITIZE_STRING); // Sanitize cryptocurrency symbol
     $price_level = filter_var($_POST['price_level'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-    //echo "Price Level: " . $price_level;  // Debugging line to check the value
     $user_id = filter_var($_POST['user_id'], FILTER_SANITIZE_NUMBER_INT); // Sanitize user ID
 
     // Check for invalid input
@@ -30,17 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Check if the user already has a price alert for this cryptocurrency
-    $checkQuery = $conn->prepare("SELECT COUNT(*) FROM price_alerts WHERE user_id = ? AND crypto_symbol = ?");
+    $checkQuery = $conn->prepare("SELECT alert_id, alert_status FROM price_alerts WHERE user_id = ? AND crypto_symbol = ?");
     $checkQuery->bind_param('is', $user_id, $crypto); // Bind parameters
     $checkQuery->execute();
-    $checkQuery->bind_result($count);
+    $checkQuery->bind_result($alert_id, $alert_status);
     $checkQuery->fetch();
     $checkQuery->close();
 
-    if ($count > 0) {
-        // If an alert already exists, update the price level
-        $updateQuery = $conn->prepare("UPDATE price_alerts SET price_level = ? WHERE user_id = ? AND crypto_symbol = ?");
-        $updateQuery->bind_param('dis', $price_level, $user_id, $crypto); // Bind parameters for the update query
+    $current_timestamp = date('Y-m-d H:i:s'); // Get current timestamp
+
+    if ($alert_id) {
+        // If an alert already exists, update the price level and status (if needed)
+        $updateQuery = $conn->prepare("UPDATE price_alerts SET price_level = ?, updated_at = ?, alert_status = ? WHERE alert_id = ?");
+        $updateQuery->bind_param('dsis', $price_level, $current_timestamp, 'active', $alert_id); // Bind parameters for the update query
 
         if ($updateQuery->execute()) {
             echo "<script>alert('Price alert updated successfully!');</script>"; // Success message
@@ -50,9 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $updateQuery->close();
     } else {
-        // If no alert exists, insert a new price alert
-        $stmt = $conn->prepare("INSERT INTO price_alerts (user_id, crypto_symbol, price_level) VALUES (?, ?, ?)");
-        $stmt->bind_param('isd', $user_id, $crypto, $price_level); // Bind parameters for the insert query
+        // If no alert exists, insert a new price alert with the necessary fields
+        $stmt = $conn->prepare("INSERT INTO price_alerts (user_id, crypto_symbol, price_level, alert_status, created_at, updated_at, email_sent) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param('isdssss', $user_id, $crypto, $price_level, 'active', $current_timestamp, $current_timestamp, 'no'); // Bind parameters for the insert query
 
         if ($stmt->execute()) {
             echo "<script>alert('Price alert set successfully!');</script>"; // Success message
@@ -239,16 +240,13 @@ $_SESSION['csrf_token'] = generateCsrfToken();
                 .then(response => response.json())
                 .then(data => {
                     if (data && data.length > 0) {
-                        var currentPrice = data[0].current_price;
-                        priceInput.value = currentPrice.toFixed(5); // Limit precision here if needed
+                        priceInput.value = data[0].current_price; // Set price in input field
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching the cryptocurrency data:', error);
+                    console.log(error);
                 });
         }
-        // Initial price update on page load (set default to Bitcoin)
-        updatePrice();
     </script>
 </body>
 </html>
