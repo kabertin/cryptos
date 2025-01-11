@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Sanitize and validate the input data
     $crypto = filter_var($_POST['crypto'], FILTER_SANITIZE_STRING); // Sanitize cryptocurrency symbol
-    $price_level = filter_var($_POST['price_level'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION); // Sanitize price level
+    $price_level = filter_var($_POST['price_level'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    //echo "Price Level: " . $price_level;  // Debugging line to check the value
     $user_id = filter_var($_POST['user_id'], FILTER_SANITIZE_NUMBER_INT); // Sanitize user ID
 
     // Check for invalid input
@@ -28,21 +29,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Prepare SQL statement to insert the price alert into the database
-    $stmt = $conn->prepare("INSERT INTO price_alerts (user_id, crypto_symbol, price_level) VALUES (?, ?, ?)");
-    $stmt->bind_param('isi', $user_id, $crypto, $price_level); // Bind parameters to the prepared statement
+    // Check if the user already has a price alert for this cryptocurrency
+    $checkQuery = $conn->prepare("SELECT COUNT(*) FROM price_alerts WHERE user_id = ? AND crypto_symbol = ?");
+    $checkQuery->bind_param('is', $user_id, $crypto); // Bind parameters
+    $checkQuery->execute();
+    $checkQuery->bind_result($count);
+    $checkQuery->fetch();
+    $checkQuery->close();
 
-    // Execute the query and handle success or failure
-    if ($stmt->execute()) {
-        // On success, alert the user that the price alert has been set
-        echo "<script>alert('Price alert set successfully!');</script>";
+    if ($count > 0) {
+        // If an alert already exists, update the price level
+        $updateQuery = $conn->prepare("UPDATE price_alerts SET price_level = ? WHERE user_id = ? AND crypto_symbol = ?");
+        $updateQuery->bind_param('dis', $price_level, $user_id, $crypto); // Bind parameters for the update query
+
+        if ($updateQuery->execute()) {
+            echo "<script>alert('Price alert updated successfully!');</script>"; // Success message
+        } else {
+            echo "<script>alert('Failed to update price alert. Please try again.');</script>"; // Error message
+        }
+
+        $updateQuery->close();
     } else {
-        // On failure, alert the user about the error
-        echo "<script>alert('Failed to set price alert. Please try again.');</script>";
-    }
+        // If no alert exists, insert a new price alert
+        $stmt = $conn->prepare("INSERT INTO price_alerts (user_id, crypto_symbol, price_level) VALUES (?, ?, ?)");
+        $stmt->bind_param('isd', $user_id, $crypto, $price_level); // Bind parameters for the insert query
 
-    // Close the prepared statement to free resources
-    $stmt->close();
+        if ($stmt->execute()) {
+            echo "<script>alert('Price alert set successfully!');</script>"; // Success message
+        } else {
+            echo "<script>alert('Failed to set price alert. Please try again.');</script>"; // Error message
+        }
+
+        $stmt->close();
+    }
 }
 
 // Fetch available cryptocurrencies from the CoinGecko API using cURL
@@ -78,6 +97,7 @@ curl_close($ch);
 // Generate a CSRF token for the form and store it in the session
 $_SESSION['csrf_token'] = generateCsrfToken();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -200,10 +220,10 @@ $_SESSION['csrf_token'] = generateCsrfToken();
         </select>
 
         <label for="price_level">Price Level (USD):</label>
-        <input type="number" name="price_level" id="price_level" step="any" required>
+        <input type="number" name="price_level" id="price_level" step="any" min="0" required>
 
         <!-- Hidden input for user ID -->
-        <input type="hidden" name="user_id" value="1"> <!-- Replace with actual user ID -->
+        <input type="hidden" name="user_id" value="<?= $_SESSION['user_id']; ?>"> <!-- user ID is stored in the SESSION since login process -->
 
         <button type="submit">Set Alert</button>
     </form>
@@ -214,28 +234,21 @@ $_SESSION['csrf_token'] = generateCsrfToken();
             var crypto = document.getElementById('crypto').value;
             var priceInput = document.getElementById('price_level');
 
-            // Make an API request to get the current price
+            // Ensure the price is set with full precision
             fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data && data.length > 0) {
-                        // Get the current price of the selected cryptocurrency
                         var currentPrice = data[0].current_price;
-
-                        // Set the current price as the value in the price_level input field
-                        priceInput.value = currentPrice;
-                    } else {
-                        console.error('No data received for the selected cryptocurrency.');
+                        priceInput.value = currentPrice.toFixed(5); // Limit precision here if needed
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching the cryptocurrency data:', error);
                 });
         }
-
         // Initial price update on page load (set default to Bitcoin)
         updatePrice();
     </script>
 </body>
 </html>
-
