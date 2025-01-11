@@ -27,7 +27,7 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log, $
         $mail->Host       = 'cryptos.mercato.rw';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'alerts@cryptos.mercato.rw';
-        $mail->Password   = 'Olivakarinda1.';
+        $mail->Password   = '';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = 465;
 
