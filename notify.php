@@ -17,7 +17,7 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel) {
         $mail->Host       = 'cryptos.mercato.rw';                       // Set the SMTP server
         $mail->SMTPAuth   = true;                                     // Enable SMTP authentication
         $mail->Username   = 'alerts@cryptos.mercato.rw';                 // SMTP username (from Mailtrap or SMTP service)
-        $mail->Password   = 'Olivakarinda1.';                 // SMTP password
+        $mail->Password   = '*************';                 // SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;           // Enable SSL encryption
         $mail->Port       = 465;                                      // TCP port for sending email
 
