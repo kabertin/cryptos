@@ -5,35 +5,52 @@ include 'db_connection.php';
 // Include PHPMailer for email sending
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-require 'vendor/autoload.php';  // Make sure you have PHPMailer installed via Composer
+require 'vendor/autoload.php';  // Make sure you have PHPMailer and Monolog installed via Composer
+
+// Include Monolog for logging
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// Create a logger instance
+$log = new Logger('email_logger');
+
+// Add a file handler (log file: email_logs.log)
+$log->pushHandler(new StreamHandler('email_logs.log', Logger::INFO));
 
 // Function to send email notifications
-function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel) {
+function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log) {
     $mail = new PHPMailer(true);
 
     try {
         // Server settings
-        $mail->isSMTP();                                            // Send using SMTP
-        $mail->Host       = 'cryptos.mercato.rw';                       // Set the SMTP server
-        $mail->SMTPAuth   = true;                                     // Enable SMTP authentication
-        $mail->Username   = 'alerts@cryptos.mercato.rw';                 // SMTP username (from Mailtrap or SMTP service)
-        $mail->Password   = '*************';                 // SMTP password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;           // Enable SSL encryption
-        $mail->Port       = 465;                                      // TCP port for sending email
+        $mail->isSMTP();
+        $mail->Host       = 'cryptos.mercato.rw';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'alerts@cryptos.mercato.rw';
+        $mail->Password   = 'Olivakarinda1.';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = 465;
 
         // Recipients
-        $mail->setFrom('no-reply@yourdomain.com', 'Crypto Alert');
-        $mail->addAddress($to);                                       // Add a recipient
+        $mail->setFrom('alerts@cryptos.mercato.rw', 'Crypto Alert');
+        $mail->addAddress($to);
 
         // Content
-        $mail->isHTML(true);                                          // Set email format to HTML
+        $mail->isHTML(true);
         $mail->Subject = 'Cryptocurrency Price Alert';
         $mail->Body    = "Hello, the price of $crypto has reached your set alert price of $priceLevel USD. Current price: $currentPrice USD.";
 
         // Send the email
         $mail->send();
+
+        // Log success
+        $log->info("SUCCESS: Email sent to $to for $crypto. Current Price: $currentPrice, Alert Price: $priceLevel.");
+
         echo "Email has been sent to $to.";
     } catch (Exception $e) {
+        // Log failure
+        $log->error("FAILURE: Email failed for $to. Error: {$mail->ErrorInfo}");
+
         echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
@@ -79,7 +96,7 @@ if ($result->num_rows > 0) {
                             $userEmail = $userRow['email'];
                             
                             // Send email notification
-                            sendEmailNotification($userEmail, $crypto['name'], $currentPrice, $priceLevel);
+                            sendEmailNotification($userEmail, $crypto['name'], $currentPrice, $priceLevel, $log);
                         }
                     }
                 }
@@ -91,4 +108,3 @@ if ($result->num_rows > 0) {
 }
 
 $conn->close();
-?>
