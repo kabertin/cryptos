@@ -18,7 +18,7 @@ $log = new Logger('email_logger');
 $log->pushHandler(new StreamHandler('email_logs.log', Logger::INFO));
 
 // Function to send email notifications
-function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log) {
+function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log, $alertId, $conn) {
     $mail = new PHPMailer(true);
 
     try {
@@ -46,6 +46,13 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log) {
         // Log success
         $log->info("SUCCESS: Email sent to $to for $crypto. Current Price: $currentPrice, Alert Price: $priceLevel.");
 
+        // Update the price_alerts table: Set email_sent to 'yes' and alert_status to 'triggered'
+        $updateSql = "UPDATE price_alerts SET email_sent = 'yes', alert_status = 'triggered' WHERE alert_id = ?";
+        $stmt = $conn->prepare($updateSql);
+        $stmt->bind_param("i", $alertId);
+        $stmt->execute();
+        $stmt->close();
+
         echo "Email has been sent to $to.";
     } catch (Exception $e) {
         // Log failure
@@ -56,7 +63,7 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log) {
 }
 
 // Fetch all price alerts from the database
-$sql = "SELECT * FROM price_alerts";
+$sql = "SELECT * FROM price_alerts WHERE email_sent = 'no'";  // Only fetch alerts that haven't been emailed
 $result = $conn->query($sql);
 
 // If there are any price alerts set
@@ -74,12 +81,13 @@ if ($result->num_rows > 0) {
         echo "cURL Error: " . curl_error($ch);
     } else {
         $cryptoList = json_decode($response, true);
-        
+
         // Loop through each price alert
         while ($row = $result->fetch_assoc()) {
             $cryptoSymbol = $row['crypto_symbol'];
             $priceLevel = $row['price_level'];
             $userId = $row['user_id'];
+            $alertId = $row['alert_id'];  // Get the alert ID
 
             // Find the current price of the selected cryptocurrency
             foreach ($cryptoList as $crypto) {
@@ -94,9 +102,9 @@ if ($result->num_rows > 0) {
                         if ($userResult->num_rows > 0) {
                             $userRow = $userResult->fetch_assoc();
                             $userEmail = $userRow['email'];
-                            
-                            // Send email notification
-                            sendEmailNotification($userEmail, $crypto['name'], $currentPrice, $priceLevel, $log);
+
+                            // Send email notification and update the database
+                            sendEmailNotification($userEmail, $crypto['name'], $currentPrice, $priceLevel, $log, $alertId, $conn);
                         }
                     }
                 }
