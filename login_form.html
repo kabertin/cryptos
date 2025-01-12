@@ -167,9 +167,7 @@
 
                 // Redirects to the dashboard if login is successful
                 if (result.includes('Login successful')) {
-                    setTimeout(() => {
                         window.location.href = 'dashboard.html'; // Redirect URL
-                    }, 2000); // Waits 2 seconds before redirecting
                 }
             } catch (error) {
                 // Displays an error message in case of a network or server issue
