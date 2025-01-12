@@ -230,23 +230,29 @@ $_SESSION['csrf_token'] = generateCsrfToken();
     </form>
     
     <script>
-        // Function to fetch the current price based on the selected cryptocurrency
-        function updatePrice() {
-            var crypto = document.getElementById('crypto').value;
-            var priceInput = document.getElementById('price_level');
+    // Function to fetch the current price based on the selected cryptocurrency
+    function updatePrice() {
+        var crypto = document.getElementById('crypto').value;
+        var priceInput = document.getElementById('price_level');
 
-            // Ensure the price is set with full precision
-            fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        priceInput.value = data[0].current_price; // Set price in input field
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                });
-        }
+        // Ensure the price is set with full precision
+        fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    var currentPrice = data[0].current_price;
+                    priceInput.value = currentPrice.toFixed(5); // Limit precision here if needed
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching the cryptocurrency data:', error);
+            });
+    }
+
+    // Initial price update on page load (set default to Bitcoin or a predefined value)
+    document.addEventListener("DOMContentLoaded", function() {
+        updatePrice(); // Run on page load
+    });
     </script>
 </body>
 </html>
