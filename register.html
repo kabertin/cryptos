@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #1b1b1b;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            background-color: #000000;
+            background-image: linear-gradient(180deg, #000000 0%, #d4cece 100%);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: #4CAF50;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Input field styling */
+        input {
+            margin-bottom: 15px; /* Space below each input */
+            background-color: transparent; /* Transparent background */
+            padding: 12px; /* Padding inside input fields */
+            font-size: 16px; /* Font size */
+            color: #000000; /* Black text color */
+            border: 1px solid #99ec9b;; /* Border color */
+            border-radius: 8px; /* Rounded corners */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition on focus */
+        }
+
+        /* Styling for input focus */
+        input:focus {
+            border-color: #99ec9b; /* Green border on focus */
+            box-shadow: 0 0 5px rgba(27, 27, 27, 0.5); /* Shadow effect on focus */
+            outline: none; /* Removes default outline */
+        }
+
+        /* Placeholder text styling */
+        input::placeholder {
+            color: #6cff5f; /* Default placeholder text color */
+            font-size: 16px; /* Font size of the placeholder */
+            opacity: 1; /* Ensures full visibility */
+        }
+
+        /* Placeholder color change on input focus */
+        input:focus::placeholder {
+            color: #84c986; /* Greenish placeholder color */
+            opacity: 1;
+        }
+
+        button {
+            padding: 12px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: rgb(24, 0, 0);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            input, button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Sign Up</h2>
+        <form method="POST" action="register.php">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</body>
+</html>
