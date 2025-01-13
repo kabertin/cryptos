@@ -210,7 +210,7 @@ header("Cache-Control: max-age=86400, public"); // Cache for 1 day
     <div id="navBar">
         <!-- Navigation links -->
         <a href="dashboard.html">All Coins</a>
-        <a href="favorites.html">Favorites</a>
+        <a href="favorites.php">Favorites</a>
         <a href="charts.html">Charts</a>
         <a href="set_notification.php">Notifications</a>
         <a href="logout.php" style="background-color: #963d3d; border-radius: 5px;">Logout</a>

@@ -256,7 +256,7 @@ $_SESSION['csrf_token'] = generateCsrfToken();
     <!-- Navigation Bar -->
     <div id="navBar">
         <a href="dashboard.html">All Coins</a>
-        <a href="favorites.html">Favorites</a>
+        <a href="favorites.php">Favorites</a>
         <a href="charts.html">Charts</a>
         <a href="set_notification.php">Notifications</a>
         <a href="logout.php" style="background-color: #963d3d; border-radius: 5px;">Logout</a>
