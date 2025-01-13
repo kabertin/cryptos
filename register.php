@@ -124,8 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: transparent;
             padding: 12px;
             font-size: 16px;
-            color: rgb(0, 0, 0);
-            border: 1px solid #464040;
+            color: #6cd66e;
+            border: 1px solid #99ec9b;
             border-radius: 8px;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
@@ -135,11 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             outline: none;
         }
         input::placeholder {
-            color: #161212;
+            color: #6cff5f;
             font-size: 16px;
+            opacity: 1;
         }
         input:focus::placeholder {
             color: #84c986;
+            opacity: 1;
         }
         button {
             padding: 12px;
@@ -154,6 +156,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         button:hover {
             background-color: #45a049;
             transform: translateY(-2px);
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .login-link a {
+            color: #113a13;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .register-link a:hover {
+            color: #45a049;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
         }
         @media (max-width: 480px) {
             .form-container {
@@ -177,6 +196,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Register</button>
         </form>
+        <!-- Link to login -->
+        <div class="login-link">
+            <a href="login_form.html">Already have an account? Log in here</a>
+        </div>
     </div>
 </body>
 </html>

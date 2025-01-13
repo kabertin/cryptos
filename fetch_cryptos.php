@@ -21,6 +21,24 @@ if ($response === false) {
     die('Error fetching data.'); // Exit the script and show an error message if the API call fails
 }
 
+// Get the response headers to check the rate limit status
+$headers = $http_response_header;
+
+// Check if the rate limit is hit by inspecting the X-RateLimit-Remaining header
+$rateLimitRemaining = null;
+foreach ($headers as $header) {
+    if (strpos($header, 'X-RateLimit-Remaining:') !== false) {
+        $rateLimitRemaining = (int) substr($header, strpos($header, ':') + 1);
+        break;
+    }
+}
+
+// If the rate limit has been reached, alert the user
+if ($rateLimitRemaining !== null && $rateLimitRemaining == 0) {
+    echo "<script>alert('API rate limit exceeded. Please try again later.');</script>";
+    die(); // Stop the script
+}
+
 // Set the header to indicate the response content type is JSON
 header('Content-Type: application/json');
 
@@ -28,4 +46,3 @@ header('Content-Type: application/json');
 echo $response;
 
 ?>
-

@@ -11,85 +11,74 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #000;
-            color: #fff;
+            background-color: #000; /* Black background */
+            color: #fff; /* White text */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Header styling */
-        header {
-            background-color: transparent;
-            padding: 0px 20px;
-            color: white;
+        /* Main title styling */
+        h1 {
+            color: #4CAF50; /* Green color */
+            margin: 40px 20px;
             text-align: center;
+            font-size: 2rem;
         }
 
         /* Navigation bar styling */
         #navBar {
             width: 100%;
-            background-color: #333;
+            background-color: #333; /* Dark background */
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            padding: 10px 0;
-            position: relative; /* Adjusted to allow navigation to be below the header */
+            padding: 10px 20px;
         }
 
+        /* Styling for navigation links */
         #navBar a {
             color: #fff;
-            padding: 14px 20px;
+            padding: 0.8rem 1rem;
             text-decoration: none;
             text-align: center;
-            font-size: 18px;
+            font-size: 1rem;
             border-right: 1px solid #444;
         }
 
+        /* Remove border from last nav link */
         #navBar a:last-child {
             border-right: none;
         }
 
+        /* Hover effect for navigation links */
         #navBar a:hover {
             background-color: #ddd;
             color: #000;
         }
 
-        /* Header title styling */
-        header h1 {
-            margin: 60px;
-            font-size: 2rem;
-            color: #258832;
-        }
-
-        /* Main content styling */
-        main {
-            padding: 20px;
-            max-width: 1200px;
-            margin: auto;
-        }
-
         /* Search bar styling */
         #searchBar {
-            width: 100%;
+            width: 90%;
             max-width: 600px;
             padding: 12px 20px;
-            margin-top: 40px; /* Adjusted margin to create space between navbar and search bar */
-            font-size: 16px;
+            margin: 2rem 0;
+            font-size: 1rem;
             border: 1px solid #555;
             border-radius: 5px;
             background-color: #222;
             color: #fff;
-            margin-bottom: 40px;
         }
 
-        /* Crypto list grid styling */
+        /* Grid layout for cryptocurrency list */
         #cryptoList {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             width: 100%;
             max-width: 1200px;
-            margin-top: 20px;
+            margin: 10px 0;
+            padding: 20px;
         }
 
         #cryptoList div {
@@ -98,6 +87,7 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+            text-align: center;
         }
 
         /* Individual crypto item styling */
@@ -112,24 +102,9 @@
             margin: 10px 0;
         }
 
-        /* Input field styling */
-        input[type="text"] {
-            width: 100%;
-            max-width: 600px;
-            padding: 12px 20px;
-            margin-bottom: 40px;
-            margin-top: 20px;
-            border: 1px solid #555;
-            border-radius: 5px;
-            font-size: 16px;
-            background-color: #222;
-            color: #fff;
-            align-items: center;
-        }
-
         /* Button styling */
         button {
-            background-color: #538d56;
+            background-color: #06b0f3;
             color: #1b0000;
             border: none;
             padding: 7px 12px;
@@ -196,6 +171,91 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            #navBar a {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+
+            #searchBar {
+                max-width: 100%;
+                font-size: 0.9rem;
+            }
+
+            #cryptoList div {
+                padding: 15px;
+                margin: 3.5px;
+            }
+
+            #cryptoList {
+                padding: 0 10px;
+            }
+
+            .modal-content {
+                max-width: 90%;
+            }
+            .modal-content {
+                margin: 20% auto; /* Increase margin for better positioning */
+                padding: 10px; /* Compact padding for better space utilization */
+                font-size: 14px; /* Slightly smaller text for better fit */
+            }
+        
+            .close {
+                font-size: 28px; /* Slightly smaller close button */
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem;
+                margin: 20px 10px;
+            }
+
+            #navBar a {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+
+            #searchBar {
+                max-width: 100%;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                max-width: 90%;
+                padding: 15px;
+            }
+            #cryptoList h3 {
+                font-size: 0.9rem;
+            }
+
+            #cryptoList p {
+                font-size: 0.7rem;
+            }
+
+            #cryptoList button {
+                font-size: 0.7rem;
+                padding: 5px 8px;
+            }
+            .modal-content {
+                margin: 25% auto; /* Increased margin for better visibility */
+                padding: 8px; /* Compact padding for space-saving */
+                font-size: 12px; /* Smaller text size for readability */
+                width: 95%; /* Reduce width to prevent overflow */
+                max-width: 90%; /* Ensure it fits within smaller screens */
+                border-radius: 5px; /* Slightly less rounding for compactness */
+            }
+        
+            .close {
+                font-size: 24px; /* Smaller close button size */
+            }
+        }
     </style>
 </head>
 <body>
@@ -209,6 +269,7 @@
         <a href="favorites.html">Favorites</a>
         <a href="charts.html">Charts</a>
         <a href="set_notification.php">Notifications</a>
+        <a href="logout.php" style="background-color: #963d3d; border-radius: 5px;">Logout</a>
     </div>
 
         <!-- Search bar to filter cryptocurrencies -->
@@ -233,10 +294,12 @@
         async function fetchCryptos() {
             try {
                 const response = await fetch('fetch_cryptos.php');
-                allCryptos = await response.json(); // Store fetched data
-                displayCryptos(allCryptos); // Display all cryptos by default
+                if (!response.ok) throw new Error('Network response was not ok');
+                allCryptos = await response.json();
+                displayCryptos(allCryptos);
             } catch (error) {
                 console.error('Error fetching cryptocurrencies:', error);
+                document.getElementById('cryptoList').innerHTML = "<p>Failed to load cryptocurrencies. Please try again later.</p>";
             }
         }
 
@@ -258,10 +321,18 @@
 
         async function renderChart(cryptoId) {
             try {
-                const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}/market_chart?vs_currency=usd&days=7`);
+                const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}/market_chart?vs_currency=usd&days=7`, {
+                    mode: 'no-cors',
+                });
                 
                 if (!response.ok) {
-                    throw new Error(`API request failed with status: ${response.status}`);
+                    if (response.status === 429) {
+                        // Show an alert if API rate limit is exceeded
+                        alert('API rate limit exceeded. Please try again later.');
+                        throw new Error('API rate limit exceeded. Please try again later.');
+                    } else {
+                        throw new Error(`API request failed with status: ${response.status}`);
+                    }
                 }
         
                 const data = await response.json();
@@ -320,7 +391,7 @@
                 });
             } catch (error) {
                 console.error(`Error loading chart data for ${cryptoId}:`, error);
-                document.getElementById('cryptoChart').parentElement.innerHTML += `<p>Error loading chart data for ${cryptoId}</p>`;
+                document.getElementById('cryptoChart').parentElement.innerHTML += `<p>${error.message}</p>`;
             }
         }
 
