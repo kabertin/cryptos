@@ -1,7 +1,7 @@
-# Project: Cryptocurrency Dashboard
+# Project: Cryptos
 
 ## Overview
-The Cryptocurrency Dashboard is a web application designed to help users track and manage their favorite cryptocurrencies. It provides real-time data visualization, a user-friendly interface, and customizable notification settings to keep users informed about market trends.
+Cryptos is a web application designed to help users track and manage their favorite cryptocurrencies. It provides real-time data visualization, a user-friendly interface, and customizable notification settings to keep users informed about market trends.
 
 ---
 
