@@ -2,7 +2,7 @@
 // Database connection settings
 $dbHost = 'localhost';
 $dbUsername = 'uqbrlykt_admin';
-$dbPassword = 'Olivakarinda1.';
+$dbPassword = '*****************';
 $dbName = 'uqbrlykt_cryptos';
 
 // Create a new MySQLi connection object
