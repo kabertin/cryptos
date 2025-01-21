@@ -223,27 +223,53 @@ header("Cache-Control: max-age=86400, public"); // Cache for 1 day
     <p id="noFavoritesMessage" class="no-favorites-message" style="display: none;">No favorites selected</p>
 
     <script>
-        // Function to fetch and display favorite coins
-        async function fetchFavorites() {
-            const response = await fetch('fetch_favorites.php'); // Fetch favorite coins from the server
-            const favorites = await response.json(); // Parse the response to JSON
-            const container = document.getElementById('favoritesList'); // Get the container to display the list
-            const noFavoritesMessage = document.getElementById('noFavoritesMessage'); // Get the no favorites message element
+    const FAVORITES_CACHE_KEY = 'favorites';
+    const FAVORITES_TIMESTAMP_KEY = 'favorites_last_updated';
+    const FAVORITES_CACHE_EXPIRY = 60000; // Cache expiration time (60 seconds)
 
-            container.innerHTML = ''; // Clear any existing content
+    // Fetch and display favorite coins
+    async function fetchFavorites() {
+        const cachedFavorites = localStorage.getItem(FAVORITES_CACHE_KEY);
+        const cachedTimestamp = localStorage.getItem(FAVORITES_TIMESTAMP_KEY);
 
-            if (favorites.length === 0) {
-                // If no favorites are found, show the "No favorites" message
-                noFavoritesMessage.style.display = 'block';
-            } else {
-                // Hide the "No favorites" message if there are favorites
-                noFavoritesMessage.style.display = 'none';
+        let favorites;
+        if (cachedFavorites && cachedTimestamp && (Date.now() - cachedTimestamp < FAVORITES_CACHE_EXPIRY)) {
+            console.log('Using cached favorites data');
+            favorites = JSON.parse(cachedFavorites);
+        } else {
+            try {
+                console.log('Fetching new favorites data');
+                const response = await fetch('fetch_favorites.php');
+                if (!response.ok) throw new Error('Failed to fetch favorites data');
+                favorites = await response.json();
+                localStorage.setItem(FAVORITES_CACHE_KEY, JSON.stringify(favorites));
+                localStorage.setItem(FAVORITES_TIMESTAMP_KEY, Date.now());
+            } catch (error) {
+                console.error('Error fetching favorites:', error);
+                return;
+            }
+        }
 
-                // Loop through each favorite cryptocurrency
-                for (let cryptoId of favorites) {
-                    const cryptoDetails = await fetchCryptoDetails(cryptoId); // Fetch details for the favorite coin
-                    const div = document.createElement('div'); // Create a new div for the coin card
-                    div.className = 'favorite-card'; // Apply the styling class for each favorite card
+        displayFavorites(favorites);
+    }
+
+    // Display favorite cryptocurrencies
+    async function displayFavorites(favorites) {
+        const container = document.getElementById('favoritesList');
+        const noFavoritesMessage = document.getElementById('noFavoritesMessage');
+
+        container.innerHTML = ''; // Clear existing content
+
+        if (favorites.length === 0) {
+            noFavoritesMessage.style.display = 'block'; // Show "No favorites" message
+        } else {
+            noFavoritesMessage.style.display = 'none'; // Hide "No favorites" message
+
+            for (const cryptoId of favorites) {
+                try {
+                    const cryptoDetails = await fetchCryptoDetails(cryptoId);
+                    const div = document.createElement('div');
+                    div.className = 'favorite-card';
                     div.innerHTML = `
                         <h3>${cryptoDetails.name} (${cryptoDetails.symbol.toUpperCase()})</h3>
                         <p>Price: $${cryptoDetails.current_price.toFixed(2)}</p>
@@ -252,17 +278,19 @@ header("Cache-Control: max-age=86400, public"); // Cache for 1 day
                         <p>24h Low: $${cryptoDetails.low_24h.toFixed(2)}</p>
                         <button onclick="removeFromFavorites('${cryptoId}')">Remove</button>
                     `;
-                    container.appendChild(div); // Append the new div to the list
+                    container.appendChild(div);
+                } catch (error) {
+                    console.error(`Failed to fetch details for ${cryptoId}:`, error);
                 }
             }
         }
+    }
 
-        // Function to fetch details of a specific cryptocurrency
-        async function fetchCryptoDetails(cryptoId) {
-            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}`); // Fetch data from CoinGecko API
-            const data = await response.json(); // Parse the response to JSON
-
-            // Extract and return the necessary details for the coin
+    // Fetch details of a specific cryptocurrency
+    async function fetchCryptoDetails(cryptoId) {
+        try {
+            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}`);
+            const data = await response.json();
             return {
                 name: data.name,
                 symbol: data.symbol,
@@ -271,20 +299,36 @@ header("Cache-Control: max-age=86400, public"); // Cache for 1 day
                 high_24h: data.market_data.high_24h.usd,
                 low_24h: data.market_data.low_24h.usd
             };
+        } catch (error) {
+            console.error('Error fetching cryptocurrency details:', error);
+            throw error;
         }
+    }
 
-        // Function to remove a cryptocurrency from favorites
-        async function removeFromFavorites(cryptoId) {
+    // Remove a cryptocurrency from favorites
+    async function removeFromFavorites(cryptoId) {
+        try {
             const response = await fetch('remove_favorite.php', {
                 method: 'POST',
-                body: new URLSearchParams({ crypto_id: cryptoId }), // Sending the crypto_id to the server
+                body: new URLSearchParams({ crypto_id: cryptoId }),
             });
-            const result = await response.text(); // Get the result of the removal request
-            alert(result); // Show the result in an alert box
-            fetchFavorites(); // Refresh the favorites list
-        }
+            const result = await response.text();
+            alert(result);
 
-        fetchFavorites(); // Initial call to load favorites when the page loads
-    </script>
+            // Clear cache since the favorites list has changed
+            localStorage.removeItem(FAVORITES_CACHE_KEY);
+            localStorage.removeItem(FAVORITES_TIMESTAMP_KEY);
+
+            // Refresh the favorites list
+            fetchFavorites();
+        } catch (error) {
+            console.error('Error removing from favorites:', error);
+            alert('Failed to remove from favorites. Please try again.');
+        }
+    }
+
+    fetchFavorites(); // Initial call to load favorites on page load
+</script>
+
 </body>
 </html>

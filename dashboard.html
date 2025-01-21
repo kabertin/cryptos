@@ -273,47 +273,45 @@
     </div>
 
     <script>
-        let allCryptos = [];
         const CACHE_KEY = 'cryptosData'; // Key to store data in localStorage
         const CACHE_TIMESTAMP_KEY = 'cryptosDataTimestamp'; // Key to store timestamp of the cache
         const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // Cache expiration time (10 minutes)
+        let allCryptos = []; // To hold the cryptocurrency data
     
-        // Function to fetch cryptocurrency data and display it on the page
+        // Fetch cryptocurrency data
         async function fetchCryptos() {
-            // Check if the data is in localStorage and if it's not expired
             const cachedData = localStorage.getItem(CACHE_KEY);
             const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
-            
+    
             if (cachedData && cachedTimestamp && (Date.now() - cachedTimestamp < CACHE_EXPIRY_TIME)) {
-                console.log('Using cached data');
-                allCryptos = JSON.parse(cachedData); // Parse the cached data
-                displayCryptos(allCryptos); // Display cached cryptos
+                console.log('Using cached cryptocurrency data');
+                allCryptos = JSON.parse(cachedData);
+                displayCryptos(allCryptos);
             } else {
-                // Fetch data from API if no valid cache is available
                 try {
+                    console.log('Fetching new cryptocurrency data');
                     const response = await fetch('fetch_cryptos.php');
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error('Failed to fetch cryptocurrency data');
                     allCryptos = await response.json();
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(allCryptos)); // Store data in localStorage
-                    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now()); // Store current timestamp
-                    displayCryptos(allCryptos); // Display fetched cryptos
-                    // Start updating cryptocurrency prices periodically
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allCryptos)); // Cache data
+                    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now()); // Update timestamp
+                    displayCryptos(allCryptos);
                     startPriceUpdates();
                 } catch (error) {
                     console.error('Error fetching cryptocurrencies:', error);
-                    document.getElementById('cryptoList').innerHTML = "<p style='color:orange;'>API limit reached. Please try again shortly.</p>";
+                    document.getElementById('cryptoList').innerHTML = "<p style='color:orange;'>API limit reached or failed to fetch data. Please try again later.</p>";
                 }
             }
         }
     
-        // Function to display cryptocurrency cards dynamically
+        // Display cryptocurrency cards
         function displayCryptos(cryptos) {
             const container = document.getElementById('cryptoList');
             container.innerHTML = '';
             cryptos.forEach(crypto => {
                 const div = document.createElement('div');
                 div.className = 'crypto-card';
-                div.id = `crypto-${crypto.id}`; // Unique ID for each card
+                div.id = `crypto-${crypto.id}`;
                 div.innerHTML = `
                     <h3>${crypto.name} (${crypto.symbol.toUpperCase()})</h3>
                     <p>Price: $<span class="crypto-price">${crypto.current_price.toFixed(2)}</span></p>
@@ -324,12 +322,12 @@
             });
         }
     
-        // Function to update cryptocurrency prices periodically
+        // Periodically update prices
         async function updatePrices() {
             try {
                 const response = await fetch(`fetch_cryptos.php?ts=${Date.now()}`);
                 const updatedCryptos = await response.json();
-        
+    
                 updatedCryptos.forEach(updatedCrypto => {
                     const cryptoCard = document.getElementById(`crypto-${updatedCrypto.id}`);
                     if (cryptoCard) {
@@ -337,22 +335,21 @@
                         priceElement.textContent = updatedCrypto.current_price.toFixed(2);
                     }
                 });
-        
+    
                 allCryptos = updatedCryptos;
-                // Update the cache with the latest data
-                localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCryptos)); // Store updated data in localStorage
+                localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCryptos)); // Update cache
                 localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now()); // Update timestamp
             } catch (error) {
-                console.error('Failed to update prices:', error);
+                console.error('Failed to update cryptocurrency prices:', error);
             }
         }
     
-        // Function to start periodic price updates every 10 seconds
+        // Start periodic price updates every 10 seconds
         function startPriceUpdates() {
             setInterval(updatePrices, 10000); // Update every 10 seconds
         }
     
-        // Function to filter cryptocurrencies based on user input in the search bar
+        // Filter cryptocurrencies based on search input
         function filterCryptos() {
             const query = document.getElementById('searchBar').value.toLowerCase();
             const filteredCryptos = allCryptos.filter(crypto =>
@@ -361,7 +358,7 @@
             displayCryptos(filteredCryptos);
         }
     
-        // Function to add a cryptocurrency to favorites
+        // Add cryptocurrency to favorites
         async function addToFavorites(cryptoId, cryptoName) {
             try {
                 const response = await fetch('add_favorite.php', {
@@ -373,44 +370,43 @@
                 });
     
                 const result = await response.text();
-    
-                if (result.includes("Added to favorites")) {
-                    alert(`${cryptoName} added to favorites!`);
-                } else {
-                    alert(`${result}`);
-                }
+                alert(result.includes("Added to favorites") ? `${cryptoName} added to favorites!` : result);
             } catch (error) {
                 console.error('Failed to add to favorites:', error);
                 alert('Failed to add to favorites. Please try again.');
             }
         }
     
-        // Function to view detailed information about a cryptocurrency
+        // View detailed cryptocurrency information
         async function viewDetails(cryptoId) {
-            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}`);
-            const crypto = await response.json();
+            try {
+                const response = await fetch(`https://api.coingecko.com/api/v3/coins/${cryptoId}`);
+                const crypto = await response.json();
     
-            const container = document.getElementById('cryptoDetails');
-            container.innerHTML = `
-                <h1>${crypto.name} (${crypto.symbol.toUpperCase()})</h1>
-                <p>Current Price: $${crypto.market_data.current_price.usd}</p>
-                <p>Market Cap: $${crypto.market_data.market_cap.usd}</p>
-                <p>24h High: $${crypto.market_data.high_24h.usd}</p>
-                <p>24h Low: $${crypto.market_data.low_24h.usd}</p>
-            `;
+                const container = document.getElementById('cryptoDetails');
+                container.innerHTML = `
+                    <h1>${crypto.name} (${crypto.symbol.toUpperCase()})</h1>
+                    <p>Current Price: $${crypto.market_data.current_price.usd}</p>
+                    <p>Market Cap: $${crypto.market_data.market_cap.usd}</p>
+                    <p>24h High: $${crypto.market_data.high_24h.usd}</p>
+                    <p>24h Low: $${crypto.market_data.low_24h.usd}</p>
+                `;
     
-            const modal = document.getElementById('cryptoModal');
-            modal.style.display = 'flex'; // Show modal with details
+                const modal = document.getElementById('cryptoModal');
+                modal.style.display = 'flex'; // Show modal
+            } catch (error) {
+                console.error('Failed to fetch cryptocurrency details:', error);
+            }
         }
     
-        // Function to close the modal window
+        // Close details modal
         function closeModal() {
-            const modal = document.getElementById('cryptoModal');
-            modal.style.display = 'none'; // Hide modal
+            document.getElementById('cryptoModal').style.display = 'none';
         }
     
-        // Fetch cryptocurrencies data on page load
+        // Fetch data on page load
         fetchCryptos();
     </script>
+    
 </body>
 </html>

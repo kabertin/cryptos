@@ -12,60 +12,66 @@ function generateCsrfToken() {
 
 // Check if the form is submitted via POST request
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // CSRF Token verification to protect against CSRF attacks
+    // CSRF Token verification
     if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-        die('CSRF token mismatch!'); // Terminate if token doesn't match
+        die('CSRF token mismatch!');
     }
 
-    // Sanitize and validate the input data
-    $crypto = filter_var($_POST['crypto'], FILTER_SANITIZE_STRING); // Sanitize cryptocurrency symbol
+    // Sanitize and validate inputs
+    $crypto_id = filter_var($_POST['crypto'], FILTER_SANITIZE_STRING); // Sanitize cryptocurrency ID
+    $crypto_symbol = filter_var($_POST['crypto_symbol'], FILTER_SANITIZE_STRING); // Sanitize cryptocurrency symbol
     $price_level = filter_var($_POST['price_level'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-    $user_id = filter_var($_POST['user_id'], FILTER_SANITIZE_NUMBER_INT); // Sanitize user ID
+    $instant_price = filter_var($_POST['instant_price'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    $user_id = filter_var($_POST['user_id'], FILTER_SANITIZE_NUMBER_INT);
 
-    // Check for invalid input
-    if (empty($crypto) || empty($price_level) || !is_numeric($price_level) || $price_level <= 0) {
-        echo "Invalid input. Please try again."; // Error message for invalid input
+
+    if (empty($crypto_id) || empty($crypto_symbol) || empty($price_level) || !is_numeric($price_level) || $price_level <= 0) {
+        echo "Invalid input. Please try again.";
         exit;
     }
 
     // Check if the user already has a price alert for this cryptocurrency
     $checkQuery = $conn->prepare("SELECT alert_id, alert_status FROM price_alerts WHERE user_id = ? AND crypto_symbol = ?");
-    $checkQuery->bind_param('is', $user_id, $crypto); // Bind parameters
+    $checkQuery->bind_param('is', $user_id, $crypto_symbol);
     $checkQuery->execute();
     $checkQuery->bind_result($alert_id, $alert_status);
     $checkQuery->fetch();
     $checkQuery->close();
 
-    $current_timestamp = date('Y-m-d H:i:s'); // Get current timestamp
+    $current_timestamp = date('Y-m-d H:i:s');
     $alert_status = 'active';
-    $email_sent = 'yes';
+    $email_sent = 'no';
+    $alert_type='';
+
+    $alert_type = ($price_level >= $instant_price) ? 'above' : 'below'; // assign alert type according to the data submitted from the form
 
     if ($alert_id) {
-        // If an alert already exists, update the price level and status (if needed)
-        $updateQuery = $conn->prepare("UPDATE price_alerts SET price_level = ?, updated_at = ?, alert_status = ? WHERE alert_id = ?");
-        $updateQuery->bind_param('dssi', $price_level, $current_timestamp, $alert_status, $alert_id); // Bind parameters for the update query
+        // Update existing alert
+        $updateQuery = $conn->prepare("UPDATE price_alerts SET price_level = ?, alert_type = ?, updated_at = ?, alert_status = ? WHERE alert_id = ?");
+        $updateQuery->bind_param('dsssi', $price_level, $alert_type, $current_timestamp, $alert_status, $alert_id);
 
         if ($updateQuery->execute()) {
-            echo "<script>alert('Price alert updated successfully!');</script>"; // Success message
+            echo "<script>alert('Price alert updated successfully!');</script>";
         } else {
-            echo "<script>alert('Failed to update price alert. Please try again.');</script>"; // Error message
+            echo "<script>alert('Failed to update price alert. Please try again.');</script>";
         }
 
         $updateQuery->close();
     } else {
-        // If no alert exists, insert a new price alert with the necessary fields
-        $stmt = $conn->prepare("INSERT INTO price_alerts (user_id, crypto_symbol, price_level, alert_status, created_at, updated_at, email_sent) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param('isdssss', $user_id, $crypto, $price_level, $alert_status, $current_timestamp, $current_timestamp, $email_sent); // Bind parameters for the insert query
+        // Insert new alert
+        $stmt = $conn->prepare("INSERT INTO price_alerts (user_id, crypto_id, crypto_symbol, price_level, alert_type, alert_status, created_at, updated_at, email_sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param('issdsssss', $user_id, $crypto_id, $crypto_symbol, $price_level, $alert_type, $alert_status, $current_timestamp, $current_timestamp, $email_sent);
 
         if ($stmt->execute()) {
-            echo "<script>alert('Price alert set successfully!');</script>"; // Success message
+            echo "<script>alert('Price alert set successfully!');</script>";
         } else {
-            echo "<script>alert('Failed to set price alert. Please try again.');</script>"; // Error message
+            echo "<script>alert('Failed to set price alert. Please try again.');</script>";
         }
 
         $stmt->close();
     }
 }
+
 
 // Fetch available cryptocurrencies from the CoinGecko API using cURL
 $cryptoList = [];
@@ -230,6 +236,14 @@ $_SESSION['csrf_token'] = generateCsrfToken();
             button {
                 font-size: 14px;
             }
+
+            label {
+                font-size: 14px;
+            }
+
+            select, input[type="number"] {
+                font-size: 14px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -247,6 +261,13 @@ $_SESSION['csrf_token'] = generateCsrfToken();
                 margin-left: 10px;
                 margin-right: 10px;
                 max-width: 90%;
+            }
+            label {
+                font-size: 12px;
+            }
+
+            select, input[type="number"] {
+                font-size: 12px;
             }
         }
     </style>
@@ -271,10 +292,15 @@ $_SESSION['csrf_token'] = generateCsrfToken();
         <select name="crypto" id="crypto" onchange="updatePrice()">
             <?php
             foreach ($cryptoList as $crypto) {
-                echo "<option value=\"" . htmlspecialchars($crypto['id']) . "\">" . htmlspecialchars($crypto['name']) . " (" . htmlspecialchars($crypto['symbol']) . ")</option>";
+                echo "<option value=\"" . htmlspecialchars($crypto['id']) . "\"
+                    data-symbol=\"" . htmlspecialchars($crypto['symbol']) . "\">"
+                    . htmlspecialchars($crypto['name']) . " (" . htmlspecialchars($crypto['symbol']) . ")</option>";
             }
             ?>
         </select>
+        <input type="hidden" id="crypto_symbol" name="crypto_symbol"> <!-- Hidden input for the symbol -->
+        
+        <input type="hidden" id="instant_price" name="instant_price"> <!-- Hidden input for the alert type (above or below) -->
 
         <label for="price_level">Price Level (USD):</label>
         <input type="number" name="price_level" id="price_level" step="any" min="0" required>
@@ -286,23 +312,54 @@ $_SESSION['csrf_token'] = generateCsrfToken();
     </form>
 
     <script>
-        function updatePrice() {
-            var crypto = document.getElementById('crypto').value;
-            var priceInput = document.getElementById('price_level');
+        const PRICE_CACHE_KEY = 'crypto_prices';
+        const PRICE_TIMESTAMP_KEY = 'crypto_prices_last_updated';
+        const PRICE_CACHE_EXPIRY = 60000; // 60 seconds
 
-            fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        var currentPrice = data[0].current_price;
-                        priceInput.value = currentPrice.toFixed(5);
-                    }
-                })
-                .catch(error => console.error('Error fetching the cryptocurrency data:', error));
+        function updatePrice() {
+            const cryptoSelect = document.getElementById('crypto');
+            const cryptoId = cryptoSelect.value; // Get the cryptocurrency ID
+            const cryptoSymbol = cryptoSelect.options[cryptoSelect.selectedIndex].getAttribute('data-symbol'); // Get the symbol
+            const priceInput = document.getElementById('price_level');
+            const instantPrice = document.getElementById('instant_price');
+            const symbolInput = document.getElementById('crypto_symbol'); // Hidden input for symbol
+
+            symbolInput.value = cryptoSymbol; // Update hidden input with the selected symbol
+
+            // Retrieve cached prices
+            const cachedPrices = JSON.parse(localStorage.getItem(PRICE_CACHE_KEY) || '{}');
+            const lastUpdated = localStorage.getItem(PRICE_TIMESTAMP_KEY);
+
+            // Check if the price is cached and still valid
+            if (cachedPrices[cryptoId] && lastUpdated && (Date.now() - lastUpdated < PRICE_CACHE_EXPIRY)) {
+                console.log('Using cached price data');
+                priceInput.value = cachedPrices[cryptoId].toFixed(5);
+                instantPrice.value = cachedPrices[cryptoId].toFixed(5);
+            } else {
+                // Fetch fresh price data
+                fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${cryptoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const currentPrice = data[0].current_price;
+                            priceInput.value = currentPrice.toFixed(5);
+                            instantPrice.value = currentPrice.toFixed(5);
+
+                            // Update cache
+                            cachedPrices[cryptoId] = currentPrice;
+                            localStorage.setItem(PRICE_CACHE_KEY, JSON.stringify(cachedPrices));
+                            localStorage.setItem(PRICE_TIMESTAMP_KEY, Date.now());
+                        }
+                    })
+                    .catch(error => console.error('Error fetching cryptocurrency data:', error));
+            }
         }
 
         document.addEventListener("DOMContentLoaded", function () {
             updatePrice();
+
+            // Add event listener to update price when the cryptocurrency selection changes
+            document.getElementById('crypto').addEventListener('change', updatePrice);
         });
     </script>
 </body>

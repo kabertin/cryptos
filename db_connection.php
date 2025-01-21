@@ -1,12 +1,12 @@
 <?php
 // Database connection settings
-$host = 'localhost'; // Hostname of the database server
-$user = 'root'; // Database username
-$password = ''; // Database password
-$dbname = 'cryptos'; // Name of the database to connect to
+$dbHost = 'localhost';
+$dbUsername = 'uqbrlykt_admin';
+$dbPassword = 'Olivakarinda1.';
+$dbName = 'uqbrlykt_cryptos';
 
 // Create a new MySQLi connection object
-$conn = new mysqli($host, $user, $password, $dbname);
+$conn = new mysqli($dbHost, $dbUsername, $dbPassword, $dbName);
 
 // Check if the connection was successful
 if ($conn->connect_error) { // If there's a connection error
@@ -15,4 +15,3 @@ if ($conn->connect_error) { // If there's a connection error
 
 // If no error, the connection is established successfully
 ?>
-

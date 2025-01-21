@@ -1,10 +1,14 @@
 <?php
+
 // Include the database connection file to interact with the database
 include 'db_connection.php';
 
+// Start the session to access session variables
+session_start();
+
 // Include PHPMailer for email sending
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHMailer\Exception;
 require 'vendor/autoload.php';  // Make sure you have PHPMailer and Monolog installed via Composer
 
 // Include Monolog for logging
@@ -27,7 +31,7 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log, $
         $mail->Host       = 'cryptos.mercato.rw';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'alerts@cryptos.mercato.rw';
-        $mail->Password   = '**************';
+        $mail->Password   = 'Olivakarinda1.';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = 465;
 
@@ -63,7 +67,7 @@ function sendEmailNotification($to, $crypto, $currentPrice, $priceLevel, $log, $
 }
 
 // Fetch all price alerts from the database
-$sql = "SELECT * FROM price_alerts WHERE email_sent = 'no'";  // Only fetch alerts that haven't been emailed
+$sql = "SELECT * FROM price_alerts WHERE email_sent = 'no' AND alert_status = 'active'";  // Only fetch alerts that haven't been emailed
 $result = $conn->query($sql);
 
 // If there are any price alerts set
@@ -85,25 +89,33 @@ if ($result->num_rows > 0) {
         // Loop through each price alert
         while ($row = $result->fetch_assoc()) {
             $cryptoSymbol = $row['crypto_symbol'];
-            $priceLevel = $row['price_level'];
+            $priceLevel = $row['price_level'];  // The price set by the user
             $userId = $row['user_id'];
             $alertId = $row['alert_id'];  // Get the alert ID
+            $alert_type = $row['alert_type'];  // Get the alert type
 
+            // Fetch user email from the database
+            $userSql = "SELECT email FROM users WHERE id = $userId";
+            $userResult = $conn->query($userSql);
+            if ($userResult->num_rows > 0) {
+                $userRow = $userResult->fetch_assoc();
+                $userEmail = $userRow['email'];
+            }
+            
             // Find the current price of the selected cryptocurrency
             foreach ($cryptoList as $crypto) {
                 if ($crypto['symbol'] === $cryptoSymbol) {
                     $currentPrice = $crypto['current_price'];
 
-                    // If the current price is greater than or equal to the set price level, send an email
-                    if ($currentPrice >= $priceLevel) {
-                        // Fetch user email from the database
-                        $userSql = "SELECT email FROM users WHERE id = $userId";
-                        $userResult = $conn->query($userSql);
-                        if ($userResult->num_rows > 0) {
-                            $userRow = $userResult->fetch_assoc();
-                            $userEmail = $userRow['email'];
-
-                            // Send email notification and update the database
+                    // Check if the set price is above or below the current price and set the condition accordingly
+                    if ($priceLevel >= $currentPrice && $alert_type == "below") {
+                        // Alert condition: if current price falls to or below the set price
+                        if ($currentPrice <= $priceLevel) {
+                            sendEmailNotification($userEmail, $crypto['name'], $currentPrice, $priceLevel, $log, $alertId, $conn);
+                        }
+                    } elseif ($priceLevel <= $currentPrice && $alert_type == "above") {
+                        // Alert condition: if current price rises to or exceeds the set price
+                        if ($currentPrice >= $priceLevel) {
                             sendEmailNotification($userEmail, $crypto['name'], $currentPrice, $priceLevel, $log, $alertId, $conn);
                         }
                     }
@@ -115,4 +127,8 @@ if ($result->num_rows > 0) {
     echo "No price alerts set.";
 }
 
+ // Add a 10-second delay, to give time to the database to update data
+ sleep(10);
+
 $conn->close();
+?>
