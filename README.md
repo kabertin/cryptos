@@ -1,122 +1,137 @@
-# Cryptos App
+# Project: Cryptocurrency Dashboard
 
-A simple web application that allows users to explore cryptocurrency prices, manage a favorites list, and track their preferences with notifications.
+## Overview
+The Cryptocurrency Dashboard is a web application designed to help users track and manage their favorite cryptocurrencies. It provides real-time data visualization, a user-friendly interface, and customizable notification settings to keep users informed about market trends.
+
+---
 
 ## Features
+- **User Authentication:**
+  - Secure user registration and login functionality.
+  - Passwords are securely hashed for safe storage.
 
-- View live cryptocurrency prices.
-- Add or remove cryptocurrencies from your favorites list.
-- Track favorite cryptos and receive updates.
-- User authentication with login and registration functionality.
-- Notification system to alert users of price changes.
-- Responsive design for a better mobile experience.
+- **Cryptocurrency Management:**
+  - Add or remove cryptocurrencies from your favorites.
+  - View a list of your favorite cryptocurrencies.
 
-## Files Overview
+- **Data Visualization:**
+  - Interactive charts displaying cryptocurrency trends using `chart.js`.
 
-Here is a brief description of the key files in this project:
+- **Notifications:**
+  - Set preferences for cryptocurrency updates and receive alerts.
 
-- **`index.php`**: The landing page of the app.
-- **`login.php`**: Handles user login logic.
-- **`register.php`**: Allows users to register a new account.
-- **`login_form.html`**: The HTML form for user login.
-- **`dashboard.html`**: Displays the dashboard, including cryptocurrency data.
-- **`charts.html`**: Displays cryptocurrency charts using Chart.js.
-- **`favorites.html`**: Displays a list of the user's favorite cryptocurrencies.
-- **`add_favorite.php`**: Adds a cryptocurrency to the user's favorites.
-- **`remove_favorite.php`**: Removes a cryptocurrency from the user's favorites.
-- **`fetch_cryptos.php`**: Fetches the current cryptocurrency prices.
-- **`fetch_favorites.php`**: Fetches the user's favorite cryptocurrencies.
-- **`notify.php`**: Sends email notifications to users when a cryptocurrency's price reaches a set alert level. This is powered by PHPMailer and Monolog for logging and email tracking.
+---
 
-## Database Structure
+## File Structure
 
-The application uses a MySQL database named `cryptos`, which contains the following tables:
+### **PHP Files**
+- **`add_favorite.php`**: Adds a cryptocurrency to the user's favorites list.
+- **`db_connection.php`**: Establishes a secure connection to the database.
+- **`fetch_cryptos.php`**: Fetches cryptocurrency data from the database or external APIs.
+- **`fetch_favorites.php`**: Retrieves the user's favorite cryptocurrencies.
+- **`favorites.php`**: Displays a page showing the user's favorite cryptocurrencies.
+- **`login.php`**: Handles user login and session management.
+- **`logout.php`**: Logs out the user and terminates their session.
+- **`notify.php`**: Sends notifications to users based on their preferences.
+- **`register.php`**: Handles user registration.
+- **`remove_favorite.php`**: Removes a cryptocurrency from the user's favorites list.
+- **`set_notification.php`**: Configures notification preferences for users.
 
-1. **`users`**: Stores user details including their email addresses.
-2. **`price_alerts`**: Stores price alert preferences for users, such as the cryptocurrency symbol, price level, and email sent status.
-3. **`favorites`**: Stores the cryptocurrencies added to each user's favorites list.
+### **HTML Files**
+- **`charts.html`**: Displays interactive charts for cryptocurrency trends.
+- **`dashboard.html`**: Serves as the main user interface after login.
+- **`login_form.html`**: Provides the login page interface.
+- **`register.html`**: Provides the registration page interface.
 
-### `price_alerts` Table Example
+### **CSS Files**
+- **`styles.css`**: Contains styling for all pages to ensure consistent and responsive design.
 
-| alert_id | user_id | crypto_symbol | price_level | email_sent | alert_status |
-|----------|---------|---------------|-------------|------------|--------------|
-| 1        | 2       | btc           | 50000       | no         | triggered    |
-| 2        | 3       | eth           | 3000        | yes        | triggered    |
+### **JavaScript Files**
+- **`chart.js`**: Manages chart rendering for `charts.html` using cryptocurrency data.
 
-### `users` Table Example
+### **Database Files**
+- **`cryptos.sql`**: SQL script to set up the database schema and initial data.
 
-| id | email               |
-|----|---------------------|
-| 2  | user1@example.com   |
-| 3  | user2@example.com   |
+### **Dependency Files**
+- **`composer.json`**: Manages PHP dependencies.
+- **`composer.lock`**: Locks dependency versions.
 
-## How It Works
+---
 
-### Price Alerts
+## Installation
 
-- Users can set price alerts for cryptocurrencies, specifying a target price.
-- The `notify.php` script checks whether the current price of the cryptocurrency meets the user's set price level.
-- If a user's alert condition is met, an email notification is sent using PHPMailer.
-- Once the email is sent, the status is updated in the database to indicate that the alert has been triggered and the email was sent.
+### Prerequisites
+- **PHP**: Version 7.4 or later.
+- **MySQL**: To store user and cryptocurrency data.
+- **Composer**: For dependency management.
+- **Web Server**: Apache or Nginx.
 
-### Email Notification Process
+### Steps
+1. **Clone the Repository**
+   ```bash
+   git clone <repository_url>
+   cd cryptocurrency-dashboard
+   ```
 
-The `notify.php` script:
-- Fetches all the price alerts that have not yet triggered an email.
-- Fetches the latest cryptocurrency prices from the CoinGecko API.
-- Compares the current price of each cryptocurrency to the price level set by the user.
-- If the current price exceeds the set price level, it sends an email using PHPMailer and logs the event with Monolog.
-- Updates the `price_alerts` table to mark the alert as triggered.
+2. **Install Dependencies**
+   ```bash
+   composer install
+   ```
 
-### Logging
+3. **Set Up the Database**
+   - Import `cryptos.sql` into your MySQL database.
+   - Update `db_connection.php` with your database credentials.
 
-- Monolog is used to log the success or failure of email notifications in a log file called `email_logs.log`.
-- Successful emails are logged with details of the sent alert, while failures include error messages.
+4. **Configure the Application**
+   - Create an `.env` file to store sensitive information (e.g., database credentials).
+   - Example `.env` file:
+     ```env
+     DB_HOST=localhost
+     DB_USER=root
+     DB_PASSWORD=your_password
+     DB_NAME=cryptos_db
+     ```
 
-## Requirements
+5. **Start the Web Server**
+   - Use a local server (e.g., XAMPP, WAMP) or deploy to a hosting service.
 
-- PHP 7.4 or higher.
-- Composer for dependency management (PHPMailer and Monolog).
-- A Mail server or SMTP setup for sending emails.
+6. **Access the Application**
+   - Open a web browser and navigate to `http://localhost/cryptocurrency-dashboard`.
 
-### To install dependencies:
+---
 
-1. Clone the repository:
+## Usage
 
-    ```bash
-    git clone https://github.com/kabertin/cryptos.git
-    ```
+1. **Register an Account:**
+   - Go to the registration page (`register.html`) and create a new account.
 
-2. Install dependencies with Composer:
+2. **Log In:**
+   - Use your credentials on the login page (`login_form.html`) to access the dashboard.
 
-    ```bash
-    composer install
-    ```
+3. **Manage Favorites:**
+   - Add or remove cryptocurrencies to/from your favorites list.
 
-3. Set up your mail server or use a service like Gmail (SMTP settings in `notify.php`).
+4. **View Charts:**
+   - Navigate to `charts.html` to explore interactive charts.
 
-4. Create a `.env` file or configure your mail settings directly in the `notify.php` file (SMTP server, email, password, etc.).
+5. **Set Notifications:**
+   - Configure your notification preferences for cryptocurrency updates.
 
-## Setup Instructions
+---
 
-1. Ensure your MySQL database is set up with the `cryptos` database and the relevant tables (`users`, `price_alerts`, `favorites`).
-2. Update your database connection details in `db_connection.php`.
-3. Add your email settings to `notify.php` for email notifications.
+## Security Best Practices
+- **Sanitize Inputs:** Ensure all user inputs are sanitized to prevent SQL injection and XSS attacks.
+- **Secure Sessions:** Use HTTPS to secure data transmission.
+- **Environment Variables:** Store sensitive credentials in an `.env` file.
 
-### Example configuration for PHPMailer in `notify.php`:
+---
 
-```php
-$mail->Host       = 'smtp.yourmailserver.com';
-$mail->Username   = 'youremail@example.com';
-$mail->Password   = 'yourpassword';
-```
+## Future Enhancements
+- Real-time price updates using WebSockets.
+- Integration with external APIs for live cryptocurrency data.
+- Enhanced user notifications with email or SMS alerts.
 
-## License
+---
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Credits
-
-- [PHPMailer](https://github.com/PHPMailer/PHPMailer)
-- [Monolog](https://github.com/Seldaek/monolog)
-- [CoinGecko API](https://www.coingecko.com/en/api)
+## Author
+Developed by **KARINDA Bertin** e-mail **karindabertin35@gmail.com**.
